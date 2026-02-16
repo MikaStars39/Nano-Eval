@@ -1,30 +1,23 @@
 import json
-
-from tqdm import tqdm
-from datasets import load_dataset
 from io import TextIOWrapper
+from tqdm import tqdm
+from ._base import load_hf_dataset, apply_box_prompt
 
-def load_hmmt2025(
-    cache_dir: str,
-    k: int,
-    f_out: TextIOWrapper,
-):
-    dataset_name="hmmt2025"
-    dataset = load_dataset(cache_dir, split="train")
+
+def load_hmmt2025(cache_dir: str, k: int, f_out: TextIOWrapper):
+    dataset_name = "hmmt2025"
+    dataset = load_hf_dataset(dataset_name, cache_dir)
     
     for idx, row in enumerate(tqdm(dataset, desc=f"Loading {dataset_name}")):
-        
         question = row["question"]
         answer = row["answer"]
+        prompt = apply_box_prompt(question)
 
         for sample_idx in range(k):
-            
-            unique_id = f"{dataset_name}_{idx}_{sample_idx}"
             record = {
-                "id": unique_id,
-                "prompt": question + "\n\nPlease reason step by step, and put your final answer within \\boxed{{}}.",
+                "id": f"{dataset_name}_{idx}_{sample_idx}",
+                "prompt": prompt,
                 "need_llm_extract": False,
                 "label": answer,
             }
-            
             f_out.write(json.dumps(record, ensure_ascii=False) + "\n")
