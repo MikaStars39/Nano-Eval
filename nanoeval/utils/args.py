@@ -89,7 +89,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--backend",
         type=str,
-        choices=["mock", "offline", "online"],
+        choices=["mock", "offline", "online", "online_ray"],
         default="mock",
         help="Inference backend for step02.",
     )
@@ -134,6 +134,30 @@ def build_arg_parser() -> argparse.ArgumentParser:
         type=int,
         default=32,
         help="Online backend concurrency.",
+    )
+    parser.add_argument(
+        "--ray-num-actors",
+        type=int,
+        default=None,
+        help="Optional actor count for online_ray backend. If unset, derived from --concurrency.",
+    )
+    parser.add_argument(
+        "--ray-worker-concurrency",
+        type=int,
+        default=None,
+        help="Optional per-actor async concurrency for online_ray backend. If unset, derived from --concurrency.",
+    )
+    parser.add_argument(
+        "--online-request-timeout-s",
+        type=float,
+        default=120.0,
+        help="Per-request timeout seconds for online/online_ray backend network calls.",
+    )
+    parser.add_argument(
+        "--online-stall-log-interval-s",
+        type=float,
+        default=15.0,
+        help="Heartbeat interval seconds when online_ray has no completed chunks.",
     )
     parser.add_argument(
         "--temperature",

@@ -76,6 +76,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             base_url=args.base_url,
             model=args.model,
             concurrency=args.concurrency,
+            ray_num_actors=args.ray_num_actors,
+            ray_worker_concurrency=args.ray_worker_concurrency,
+            online_request_timeout_s=args.online_request_timeout_s,
+            online_stall_log_interval_s=args.online_stall_log_interval_s,
         )
         final_summary["step02"] = step02_summary
         logging.info("Step 2 completed: %s", step02_summary)

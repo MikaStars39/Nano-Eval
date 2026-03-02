@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+export RAY_ACCEL_ENV_VAR_OVERRIDE_ON_ZERO=0
 
 # Minimal online evaluation script.
 REPO_ROOT=/mnt/llm-train/users/explore-train/qingyu/NanoEval
@@ -30,7 +31,7 @@ ONLINE_ARGS=(
 )
 
 ROLLOUT_ARGS=(
-  --backend online
+  --backend online_ray
   --temperature 1.0
   --top-p 0.95
   --top-k 20
@@ -38,7 +39,12 @@ ROLLOUT_ARGS=(
   --presence-penalty 1.5
   --repetition-penalty 1.0
   --max-tokens 32768
-  --concurrency 1024
+  --concurrency 128
+  # Optional explicit split for online_ray:
+  --ray-num-actors 8
+  --ray-worker-concurrency 16
+  --online-request-timeout-s 300
+  --online-stall-log-interval-s 10
   --n-proc 32
 )
 
