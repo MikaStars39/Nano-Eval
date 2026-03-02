@@ -1,5 +1,6 @@
 import json
 import logging
+import csv
 from typing import Dict, List
 from pathlib import Path
 from multiprocessing import Pool
@@ -75,6 +76,7 @@ def eval_results(
     eval_output_file: Path,
     score_output_file: Path,
     final_eval_output_file: Path,
+    final_eval_csv_output_file: Path | None = None,
     n_proc: int = 32
 ) -> Dict[str, Dict[str, float]]:
     
@@ -120,5 +122,20 @@ def eval_results(
         for ds_name, ds_metrics in metrics.items():
             f.write(json.dumps([ds_name, ds_metrics], ensure_ascii=False) + "\n")
     logging.info(f"Saved final metrics to {final_eval_output_file}")
+
+    if final_eval_csv_output_file is not None:
+        final_eval_csv_output_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(final_eval_csv_output_file, "w", encoding="utf-8", newline="") as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=["task", "avg_k", "pass_k"])
+            writer.writeheader()
+            for task_name, task_metrics in metrics.items():
+                writer.writerow(
+                    {
+                        "task": task_name,
+                        "avg_k": task_metrics.get("avg_k", 0),
+                        "pass_k": task_metrics.get("pass_k", 0),
+                    }
+                )
+        logging.info(f"Saved final metrics csv to {final_eval_csv_output_file}")
     
     return metrics

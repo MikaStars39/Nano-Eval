@@ -97,7 +97,7 @@ def write_jsonl(path: Path, records: Iterable[Dict[str, Any]]) -> int:
 def prepare_eval_input(
     task_names: Sequence[str],
     task_dir: Path,
-    pass_k: int,
+    pass_k_by_task: Dict[str, int],
     output_path: Path,
     chat_template_model_path: str | None = None,
     system_prompt: str = "",
@@ -136,12 +136,15 @@ def prepare_eval_input(
     task_sizes: Dict[str, int] = {}
 
     for task_name in task_names:
+        current_pass_k = pass_k_by_task.get(task_name)
+        if current_pass_k is None:
+            raise ValueError(f"Missing pass-k for task: {task_name}")
         task_file = resolve_task_file(task_name=task_name, task_dir=task_dir)
         rows = load_jsonl_records(task_file)
         expanded_rows = expand_records_for_pass_k(
             task_name=task_name,
             rows=rows,
-            pass_k=pass_k,
+            pass_k=current_pass_k,
             prompt_transform=prompt_transform,
         )
         task_sizes[task_name] = len(expanded_rows)
@@ -151,7 +154,7 @@ def prepare_eval_input(
     return {
         "task_count": len(task_names),
         "instance_count": total_count,
-        "pass_k": pass_k,
+        "pass_k_by_task": pass_k_by_task,
         "task_sizes": task_sizes,
         "output_path": str(output_path),
     }

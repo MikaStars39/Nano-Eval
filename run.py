@@ -10,7 +10,7 @@ from nanoeval.reward.score import eval_results
 from nanoeval.utils import (
     configure_logger,
     parse_cli_args,
-    parse_task_names,
+    parse_task_pass_k,
     prepare_eval_input,
 )
 from nanoeval.utils.args import (
@@ -49,11 +49,15 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "chat template model path is required for step01. "
                 "Please provide --chat-template-model-path or --model-path."
             )
-        task_names = parse_task_names(tasks_arg=args.tasks, task_dir=args.task_dir)
+        task_names, pass_k_by_task = parse_task_pass_k(
+            tasks_arg=args.tasks,
+            task_dir=args.task_dir,
+            default_pass_k=args.pass_k,
+        )
         step01_summary = prepare_eval_input(
             task_names=task_names,
             task_dir=args.task_dir,
-            pass_k=args.pass_k,
+            pass_k_by_task=pass_k_by_task,
             output_path=step01_output,
             chat_template_model_path=chat_template_model_path,
             system_prompt=args.system_prompt,
@@ -86,6 +90,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             eval_output_file=eval_input,
             score_output_file=score_output,
             final_eval_output_file=final_eval_output,
+            final_eval_csv_output_file=final_eval_output.with_suffix(".csv"),
             n_proc=args.n_proc,
         )
         step03_summary = {

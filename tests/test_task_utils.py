@@ -33,7 +33,7 @@ class TestTaskUtils(unittest.TestCase):
             summary = prepare_eval_input(
                 task_names=["aime2024"],
                 task_dir=task_dir,
-                pass_k=2,
+                pass_k_by_task={"aime2024": 2},
                 output_path=output_path,
             )
             self.assertEqual(summary["task_count"], 1)
@@ -71,7 +71,7 @@ class TestTaskUtils(unittest.TestCase):
             prepare_eval_input(
                 task_names=["aime2024"],
                 task_dir=task_dir,
-                pass_k=2,
+                pass_k_by_task={"aime2024": 2},
                 output_path=output_path,
             )
 

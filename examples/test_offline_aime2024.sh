@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Real offline evaluation for AIME2024 with a local model.
+# Real offline evaluation for math tasks with a local model.
 REPO_ROOT=/mnt/llm-train/users/explore-train/qingyu/NanoEval
 TASK_DIR="${REPO_ROOT}/outputs/nano_eval"
-TASK_NAME="aime2024"
-PASS_K=8
+TASK_SPECS="aime2024@4,aime2025@8"
+DEFAULT_PASS_K=1
 SYSTEM_PROMPT="You are a careful math solver. Show reasoning clearly and end with the final answer in \\boxed{}."
+MODEL_PATH=/mnt/llm-train/users/explore-train/qingyu/.cache/DeepSeek-R1-Distill-Qwen-1.5B
+WORKDIR="${REPO_ROOT}/outputs/test"
 
 LOG_FILE="${WORKDIR}/run.log"
 mkdir -p "${WORKDIR}"
@@ -14,27 +16,28 @@ mkdir -p "${WORKDIR}"
 if [[ ! -d "${MODEL_PATH}" ]]; then
   echo "Model path not found: ${MODEL_PATH}"
   exit 1
-fi
-
-if [[ ! -f "${TASK_DIR}/${TASK_NAME}.jsonl" ]]; then
-  echo "Task file not found: ${TASK_DIR}/${TASK_NAME}.jsonl"
-  exit 1
-fi
+for spec in ${TASK_SPECS//,/ }; do
+  task_name="${spec%@*}"
+  if [[ ! -f "${TASK_DIR}/${task_name}.jsonl" ]]; then
+    echo "Task file not found: ${TASK_DIR}/${task_name}.jsonl"
+    exit 1
+  fi
+done
 
 TASK_ARGS=(
-  --stage all \
-  --task-dir "${TASK_DIR}" \
-  --tasks "${TASK_NAME}" \
-  --pass-k "${PASS_K}" \
+  --stage all
+  --task-dir "${TASK_DIR}"
+  --tasks "${TASK_SPECS}"
+  --pass-k "${DEFAULT_PASS_K}"
   --system-prompt "${SYSTEM_PROMPT}"
   --n-proc 8
 )
 
 ROLLOUT_ARGS=(
-  --backend offline \
-  --model-path /mnt/llm-train/users/explore-train/qingyu/.cache/DeepSeek-R1-Distill-Qwen-1.5B \
-  --work-dir /mnt/llm-train/users/explore-train/qingyu/NanoEval/outputs/test \
-  --temperature 1 \
+  --backend offline
+  --model-path "${MODEL_PATH}"
+  --work-dir "${WORKDIR}"
+  --temperature 1
   --max-tokens 32768
 )
 

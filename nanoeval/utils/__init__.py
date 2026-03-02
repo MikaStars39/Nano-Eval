@@ -1,4 +1,4 @@
-from .args import parse_cli_args, parse_task_names
+from .args import parse_cli_args, parse_task_names, parse_task_pass_k
 from .logging_utils import configure_logger
 from .task import (
     TASK_TO_JSONL,
@@ -17,6 +17,7 @@ __all__ = [
     "load_jsonl_records",
     "parse_cli_args",
     "parse_task_names",
+    "parse_task_pass_k",
     "prepare_eval_input",
     "resolve_task_file",
 ]
