@@ -4,34 +4,22 @@ set -euo pipefail
 # Real offline evaluation for math tasks with a local model.
 REPO_ROOT=/mnt/llm-train/users/explore-train/qingyu/NanoEval
 WORKDIR=${WORKDIR:-${REPO_ROOT}/outputs/test_offline_aime2024}
-
-LOG_FILE="${WORKDIR}/run.log"
-mkdir -p "${WORKDIR}"
-
-# Added: output paths required by run.py for step01/step02/step03 artifacts.
 PREPARED_INPUT="${WORKDIR}/step01_prepared.jsonl"
 INFERENCE_OUTPUT="${WORKDIR}/step02_inference.jsonl"
 SCORE_OUTPUT="${WORKDIR}/step03_score.jsonl"
 FINAL_EVAL_OUTPUT="${WORKDIR}/step03_final_eval.jsonl"
+LOG_FILE="${WORKDIR}/run.log"
+mkdir -p "${WORKDIR}"
 
 TASK_ARGS=(
   --stage all
   --task-dir ${REPO_ROOT}/outputs/nano_eval
-  --tasks "aime2024@4,aime2025@8"
-  # Added: default pass-k for tasks without @k in --tasks.
+  --tasks "aime2024@4,aime2025@4,math500@1,gpqa_diamond@1"
   --pass-k 1
-  # Added: explicit step01 output jsonl (required).
   --output ${PREPARED_INPUT}
-  # Added: explicit step02 output jsonl (required).
   --inference-output ${INFERENCE_OUTPUT}
-  # Added: explicit per-instance score output jsonl for step03 (required).
   --score-output ${SCORE_OUTPUT}
-  # Added: explicit aggregated metric output jsonl for step03 (required).
   --final-eval-output ${FINAL_EVAL_OUTPUT}
-  # Added: override step03 input; default is --inference-output when omitted.
-  # --eval-input ${INFERENCE_OUTPUT}
-  # Added: override step02 input; default is --output when omitted.
-  # --input ${PREPARED_INPUT}
   --system-prompt ""
   --n-proc 8
 )
